@@ -43,13 +43,14 @@ class FirewallPattern extends Pattern
         this.dangerSpots.add(dangerSpot2);
     }
 
-    postDraw() {
+    postDraw(hasDuration) {
         const red = Phaser.Display.Color.ValueToColor(0xFF0000);
         const white = Phaser.Display.Color.ValueToColor(0xFFFFFF);
         const coolRed = Phaser.Display.Color.ValueToColor(0xDE151F);
 
         let timeline = this.scene.tweens.createTimeline();
-        let delay = this.animationDelay;
+        let delay = hasDuration ? this.animationDelay : 0;
+		let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
 
         // Add rotation animation
         const currentAngle = this.images.getChildren()[0].angle;
@@ -57,15 +58,16 @@ class FirewallPattern extends Pattern
             timeline.add({
                 targets: this.images.getChildren(),
                 ease: 'Linear',
-                duration: constants.ANIMATION_DURATIONS.rotation,
+                duration: rotationDuration,
                 angle: this.rotation === 'clockwise' ? (currentAngle + 90) : (currentAngle - 90)
             });
-            delay -= constants.ANIMATION_DURATIONS.rotation;
+            delay -= rotationDuration;
         }
 
+		let firewallDuration = hasDuration ? constants.ANIMATION_DURATIONS.firewall : 0;
         timeline.add({
             targets: this.images.getChildren(),
-            duration: constants.ANIMATION_DURATIONS.firewall / 2,
+            duration: firewallDuration / 2,
             colorCounter: 100,
             ease: 'Linear',
             delay: delay,
@@ -102,6 +104,11 @@ class FirewallPattern extends Pattern
         this.dangerSpots.clear(true, true);
         this.images.clear(true, true);
     }
+	
+	retry() {
+		this.reset();
+		this.preDraw();
+	}
 }
 
 export default FirewallPattern;

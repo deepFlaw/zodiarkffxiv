@@ -54,17 +54,20 @@ class AigedonPattern extends Pattern
         this.dangerSpots.add(dangerSpot);
     }
 
-    postDraw() {
+    postDraw(hasDuration) {
         const red = Phaser.Display.Color.ValueToColor(0xFF0000);
         const white = Phaser.Display.Color.ValueToColor(0xFFFFFF);
         const coolRed = Phaser.Display.Color.ValueToColor(0xDE151F);
+		
+		let aigedonDuration = hasDuration ? constants.ANIMATION_DURATIONS.aigedon : 0;
+		let delay = hasDuration ? this.animationDelay : 0;
 
         this.scene.tweens.add({
             targets: this.images.getChildren(),
-            duration: constants.ANIMATION_DURATIONS.aigedon / 2,
+            duration: aigedonDuration / 2,
             colorCounter: 100,
             ease: 'Linear',
-            delay: this.animationDelay,
+            delay: delay,
             yoyo: true,
             onUpdate: (tween, target) => {
                 const targetColor = Phaser.Display.Color.Interpolate.ColorWithColor(white, red, 100, tween.getValue());
@@ -99,6 +102,11 @@ class AigedonPattern extends Pattern
         this.dangerSpots.clear(true, true);
         this.images.clear(true, true);
     }
+	
+	retry() {
+		this.reset();
+		this.preDraw();
+	}
 }
 
 export default AigedonPattern;

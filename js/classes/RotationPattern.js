@@ -57,6 +57,11 @@ class RotationPattern extends Pattern
     reset() {
         this.arrows.clear(true, true);
     }
+	
+	retry() {
+		this.reset();
+		this.preDraw();
+	}
 }
 
 export default RotationPattern;

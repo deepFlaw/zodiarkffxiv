@@ -1,4 +1,4 @@
-import constants from '../constants.js';
+ import constants from '../constants.js';
 
 import Pattern from './Pattern.js';
 
@@ -64,28 +64,30 @@ class BirdPattern extends Pattern
         }
     }
 
-    postDraw() {        
+    postDraw(hasDuration) {        
         const red = Phaser.Display.Color.ValueToColor(0xFF0000);
         const white = Phaser.Display.Color.ValueToColor(0xFFFFFF);
         const coolRed = Phaser.Display.Color.ValueToColor(0xDE151F);
 
         let timeline = this.scene.tweens.createTimeline();
-        let delay = this.animationDelay;
+        let delay = hasDuration ? this.animationDelay : 0;
+		let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
 
         // Add rotation animation
         if (this.rotation) {
             timeline.add({
                 targets: this.images.getChildren(),
                 ease: 'Linear',
-                duration: constants.ANIMATION_DURATIONS.rotation,
+                duration: rotationDuration,
                 angle: this.rotation === 'clockwise' ? 90 : -90
             });
-            delay -= constants.ANIMATION_DURATIONS.rotation;
+            delay -= rotationDuration;
         }
 
+		let birdDuration = hasDuration ? constants.ANIMATION_DURATIONS.bird : 0;
         timeline.add({
             targets: this.images.getChildren(),
-            duration: constants.ANIMATION_DURATIONS.bird / 2,
+            duration: birdDuration / 2,
             colorCounter: 100,
             ease: 'Linear',
             delay: delay,
@@ -122,6 +124,11 @@ class BirdPattern extends Pattern
         this.safeSpots.clear(true, true);
         this.images.clear(true, true);
     }
+	
+	retry() {
+		this.reset();
+		this.preDraw();
+	}
 }
 
 export default BirdPattern;

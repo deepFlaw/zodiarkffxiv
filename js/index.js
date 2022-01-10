@@ -13,7 +13,7 @@ import SnakePattern from './classes/SnakePattern.js';
 const config = {
     type: Phaser.AUTO,
     width: constants.GAME_SIZE,
-    height: constants.GAME_SIZE,
+    height: constants.GAME_SIZE*2,
     scale: {
         parent: 'game',
         autoCenter: Phaser.Scale.CENTER_BOTH
@@ -42,17 +42,25 @@ let gameOver = false;
 let patterns;
 let confirmButton;
 let nextButton;
+let retryButton;
 let resultIcon;
 let patternSelect;
 let currentPattern = -1;
 let currentPatternText;
 let nextPattern = -1;
+let modes;
+let currentMode = 0;
 
 // Assumes that if a rotation pattern is included it will be the first element of the config array
 function createPatternsFromConfig(scene, config) {
     let parsedPatterns = [];
     if (Array.isArray(config)) {
         for (const pattern of config) {
+			// Flashcard modes do all animations at once
+			if (currentMode >= 2) {
+				animationDelay = 0;
+			}
+			
             switch(pattern.type) {
                 case 'rotation':
                     rotation = Math.random() > 0.5 ? 'clockwise' : 'counterclockwise';
@@ -139,6 +147,11 @@ function createPatternsFromConfig(scene, config) {
         }
     }
 
+	// Set a small delay even in flashcard mode to avoid issues with continuing too soon
+	if (currentMode >= 2) {
+		animationDelay = 1500;
+	}		
+
     return parsedPatterns;
 }
 
@@ -175,18 +188,25 @@ function checkResult(scene) {
         } else {
             resultIcon = scene.add.image(700, 700, 'redx');
         }
+		// Only show retry when in those modes
+		if (currentMode%2 == 1 && !safe) {
+			retryButton.setVisible(true);
+		} else {
+			nextButton.setVisible(true);
+		}
 
         confirmButton.setVisible(false);
-        nextButton.setVisible(true);
     }, animationDelay);
 }
 
 function postDraw(scene) {
+	let hasDuration = (currentMode < 2);
+	let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
     if (rotation) {
         scene.tweens.add({
             targets: arena,
             ease: 'Linear',
-            duration: constants.ANIMATION_DURATIONS.rotation,
+            duration: rotationDuration,
             angle: rotation === 'clockwise' ? 90 : -90
         });
     }
@@ -201,14 +221,14 @@ function postDraw(scene) {
 
     if (!anyBird) {
         // As a starting point whole arena is green
+		let greenDelay = hasDuration ? (rotation ? 2000 : 1000) : 0;
         setTimeout(() => {
             arenaPostDraw = scene.add.rectangle(constants.ARENA_SIZE, constants.ARENA_SIZE, constants.GAME_SIZE / 2, constants.GAME_SIZE / 2, 0x27B24A);
             arenaPostDraw.depth = constants.ARENA_POSTDRAW_DEPTH;
-        }, rotation ? 2000 : 1000);
+        }, greenDelay);
     }
-
     for (const pattern of patterns) {
-        pattern.postDraw();
+        pattern.postDraw(hasDuration);
     }
 }
 
@@ -256,6 +276,33 @@ function resetScene() {
     confirmButton.setVisible(true);
     confirmButton.setEnabled(false);
     nextButton.setVisible(false);
+	retryButton.setVisible(false);
+
+    arena.angle = 0;
+    animationDelay = 0;
+    rotation = false;
+    gameOver = false;
+}
+
+function retryScene() {
+    if (arenaPostDraw) {
+        arenaPostDraw.destroy();
+    }
+    if (target) {
+        target.destroy();
+    }
+    if (resultIcon) {
+        resultIcon.destroy();
+    }
+    // Retry all patterns
+    for (const pattern of patterns) {
+        pattern.retry();
+    }
+
+    confirmButton.setVisible(true);
+    confirmButton.setEnabled(false);
+    nextButton.setVisible(false);
+	retryButton.setVisible(false);
 
     arena.angle = 0;
     animationDelay = 0;
@@ -285,6 +332,7 @@ function preload() {
     this.load.image('buttonDisabled', 'assets/buttonDisabled.png');
 
     this.load.html('patternSelect', 'components/PatternSelect.html');
+    this.load.html('modes', 'components/Modes.html');
 }
 
 function create() {
@@ -327,7 +375,6 @@ function create() {
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, (pointer) => {
             draggingTarget = false;
         });
-
     // Buttons
     let scene = this;
     confirmButton = new CustomButton(this, 400, 750, 'Confirm', () => { checkResult(scene); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
@@ -337,17 +384,31 @@ function create() {
     nextButton = new CustomButton(this, 400, 750, 'Next', () => { resetScene(); newPattern(scene); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
     nextButton.setVisible(false);
     this.add.existing(nextButton);
+	
+    retryButton = new CustomButton(this, 400, 750, 'Retry', () => { retryScene(); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
+    retryButton.setVisible(false);
+    this.add.existing(retryButton);
 
     // Pattern select
     this.add.text(20, 640, 'Current pattern:');
     currentPatternText = this.add.text(20, 660, '');
-    this.add.text(20, 690, 'Next pattern:');
+    this.add.text(20, 690, 'Next pattern:'); 
     patternSelect = this.add.dom(20, 710).createFromCache('patternSelect');
     patternSelect.setOrigin(0, 0);
     patternSelect.addListener('click');
 
     patternSelect.on('click', (e) => {
         nextPattern = e.target.value;
+    });
+	
+	// Mode
+    this.add.text(20, 800, 'Mode:');
+    modes = this.add.dom(20, 820).createFromCache('modes');
+    modes.setOrigin(0, 0);
+    modes.addListener('click');
+
+    modes.on('click', (e) => {
+        currentMode = e.target.value;
     });
 
     newPattern(scene);
