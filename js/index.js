@@ -218,16 +218,16 @@ function newPattern(scene) {
     if (nextPattern >= 0 && nextPattern < constants.PATTERNS.length) {
         nextIndex = nextPattern;
     } else if (nextPattern == -1) {
-		if (currentPattern == 8) {
-			nextIndex = 0;
-		} else {
-			nextIndex = ++currentPattern;
-		}
-	}
+        if (currentPattern == 8) {
+            nextIndex = 0;
+        } else {
+            nextIndex = ++currentPattern;
+        }
+    }
     
     patterns = createPatternsFromConfig(scene, constants.PATTERNS[nextIndex]);
     currentPattern = nextIndex;
-	currentPatternText.text = 'Paradeigma #'+(++nextIndex);
+    currentPatternText.text = 'Paradeigma #'+(++nextIndex);
     //patterns = createPatternsFromConfig(scene, constants.PATTERNS[4]);
     /*patterns = createPatternsFromConfig(scene, [
         { type: 'sigil' }
