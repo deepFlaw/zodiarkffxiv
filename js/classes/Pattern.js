@@ -11,7 +11,7 @@ class Pattern
         return true;
     }
     reset() {}
-	retry() {}
+    retry() {}
 }
 
 export default Pattern;

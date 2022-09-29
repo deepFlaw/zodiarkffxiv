@@ -68,9 +68,9 @@ class SnakePattern extends Pattern
         const coolRed = Phaser.Display.Color.ValueToColor(0xDE151F);
 
         let timeline = this.scene.tweens.createTimeline();
-		
-		let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
-		let delay = hasDuration ? this.animationDelay : 0;
+        
+        let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
+        let delay = hasDuration ? this.animationDelay : 0;
 
         // Add rotation animation
         if (this.rotation) {
@@ -83,7 +83,7 @@ class SnakePattern extends Pattern
             delay -= rotationDuration;
         }
 
-		let snakeDuration = hasDuration ? constants.ANIMATION_DURATIONS.snake : 0;
+        let snakeDuration = hasDuration ? constants.ANIMATION_DURATIONS.snake : 0;
         timeline.add({
             targets: this.images.getChildren(),
             duration: snakeDuration / 2,
@@ -123,11 +123,11 @@ class SnakePattern extends Pattern
         this.dangerSpots.clear(true, true);
         this.images.clear(true, true);
     }
-	
-	retry() {
-		this.reset();
-		this.preDraw();
-	}
+    
+    retry() {
+        this.reset();
+        this.preDraw();
+    }
 }
 
 export default SnakePattern;

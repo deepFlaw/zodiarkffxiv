@@ -50,7 +50,7 @@ class FirewallPattern extends Pattern
 
         let timeline = this.scene.tweens.createTimeline();
         let delay = hasDuration ? this.animationDelay : 0;
-		let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
+        let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
 
         // Add rotation animation
         const currentAngle = this.images.getChildren()[0].angle;
@@ -64,7 +64,7 @@ class FirewallPattern extends Pattern
             delay -= rotationDuration;
         }
 
-		let firewallDuration = hasDuration ? constants.ANIMATION_DURATIONS.firewall : 0;
+        let firewallDuration = hasDuration ? constants.ANIMATION_DURATIONS.firewall : 0;
         timeline.add({
             targets: this.images.getChildren(),
             duration: firewallDuration / 2,
@@ -104,11 +104,11 @@ class FirewallPattern extends Pattern
         this.dangerSpots.clear(true, true);
         this.images.clear(true, true);
     }
-	
-	retry() {
-		this.reset();
-		this.preDraw();
-	}
+    
+    retry() {
+        this.reset();
+        this.preDraw();
+    }
 }
 
 export default FirewallPattern;

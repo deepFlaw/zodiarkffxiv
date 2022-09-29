@@ -71,7 +71,7 @@ class BirdPattern extends Pattern
 
         let timeline = this.scene.tweens.createTimeline();
         let delay = hasDuration ? this.animationDelay : 0;
-		let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
+        let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
 
         // Add rotation animation
         if (this.rotation) {
@@ -84,7 +84,7 @@ class BirdPattern extends Pattern
             delay -= rotationDuration;
         }
 
-		let birdDuration = hasDuration ? constants.ANIMATION_DURATIONS.bird : 0;
+        let birdDuration = hasDuration ? constants.ANIMATION_DURATIONS.bird : 0;
         timeline.add({
             targets: this.images.getChildren(),
             duration: birdDuration / 2,
@@ -124,11 +124,11 @@ class BirdPattern extends Pattern
         this.safeSpots.clear(true, true);
         this.images.clear(true, true);
     }
-	
-	retry() {
-		this.reset();
-		this.preDraw();
-	}
+    
+    retry() {
+        this.reset();
+        this.preDraw();
+    }
 }
 
 export default BirdPattern;

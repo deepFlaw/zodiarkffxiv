@@ -48,19 +48,21 @@ let patternSelect;
 let currentPattern = -1;
 let currentPatternText;
 let nextPattern = -1;
-let modes;
-let currentMode = 0;
+let aniOption;
+let aniMode = 0;
+let retryOption;
+let retryMode = 0;
 
 // Assumes that if a rotation pattern is included it will be the first element of the config array
 function createPatternsFromConfig(scene, config) {
     let parsedPatterns = [];
     if (Array.isArray(config)) {
         for (const pattern of config) {
-			// Flashcard modes do all animations at once
-			if (currentMode >= 2) {
-				animationDelay = 0;
-			}
-			
+            // Flashcard modes do all animations at once
+            if (aniMode == 1) {
+                animationDelay = 0;
+            }
+            
             switch(pattern.type) {
                 case 'rotation':
                     rotation = Math.random() > 0.5 ? 'clockwise' : 'counterclockwise';
@@ -147,10 +149,10 @@ function createPatternsFromConfig(scene, config) {
         }
     }
 
-	// Set a small delay even in flashcard mode to avoid issues with continuing too soon
-	if (currentMode >= 2) {
-		animationDelay = 1500;
-	}		
+    // Set a small delay even in flashcard mode to avoid issues with continuing too soon
+    if (aniMode == 1) {
+        animationDelay = 1500;
+    }       
 
     return parsedPatterns;
 }
@@ -188,20 +190,23 @@ function checkResult(scene) {
         } else {
             resultIcon = scene.add.image(700, 700, 'redx');
         }
-		// Only show retry when in those modes
-		if (currentMode%2 == 1 && !safe) {
-			retryButton.setVisible(true);
-		} else {
-			nextButton.setVisible(true);
-		}
+		
+		// Show next unless in Required mode
+		if (retryMode < 2 || safe) {
+            nextButton.setVisible(true);
+        }
+        // Only show retry when in those modes
+        if (retryMode > 0 && !safe) {
+            retryButton.setVisible(true);
+        }
 
         confirmButton.setVisible(false);
     }, animationDelay);
 }
 
 function postDraw(scene) {
-	let hasDuration = (currentMode < 2);
-	let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
+    let hasDuration = (aniMode == 0);
+    let rotationDuration = hasDuration ? constants.ANIMATION_DURATIONS.rotation : 0;
     if (rotation) {
         scene.tweens.add({
             targets: arena,
@@ -221,7 +226,7 @@ function postDraw(scene) {
 
     if (!anyBird) {
         // As a starting point whole arena is green
-		let greenDelay = hasDuration ? (rotation ? 2000 : 1000) : 0;
+        let greenDelay = hasDuration ? (rotation ? 2000 : 1000) : 0;
         setTimeout(() => {
             arenaPostDraw = scene.add.rectangle(constants.ARENA_SIZE, constants.ARENA_SIZE, constants.GAME_SIZE / 2, constants.GAME_SIZE / 2, 0x27B24A);
             arenaPostDraw.depth = constants.ARENA_POSTDRAW_DEPTH;
@@ -276,7 +281,7 @@ function resetScene() {
     confirmButton.setVisible(true);
     confirmButton.setEnabled(false);
     nextButton.setVisible(false);
-	retryButton.setVisible(false);
+    retryButton.setVisible(false);
 
     arena.angle = 0;
     animationDelay = 0;
@@ -302,7 +307,7 @@ function retryScene() {
     confirmButton.setVisible(true);
     confirmButton.setEnabled(false);
     nextButton.setVisible(false);
-	retryButton.setVisible(false);
+    retryButton.setVisible(false);
 
     arena.angle = 0;
     animationDelay = 0;
@@ -332,7 +337,8 @@ function preload() {
     this.load.image('buttonDisabled', 'assets/buttonDisabled.png');
 
     this.load.html('patternSelect', 'components/PatternSelect.html');
-    this.load.html('modes', 'components/Modes.html');
+    this.load.html('aniOption', 'components/Animation.html');
+    this.load.html('retryOption', 'components/Retry.html');
 }
 
 function create() {
@@ -384,8 +390,8 @@ function create() {
     nextButton = new CustomButton(this, 400, 750, 'Next', () => { resetScene(); newPattern(scene); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
     nextButton.setVisible(false);
     this.add.existing(nextButton);
-	
-    retryButton = new CustomButton(this, 400, 750, 'Retry', () => { retryScene(); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
+    
+    retryButton = new CustomButton(this, 400, 850, 'Retry', () => { retryScene(); }, 'buttonUp', 'buttonOver', 'buttonDown', 'buttonDisabled');
     retryButton.setVisible(false);
     this.add.existing(retryButton);
 
@@ -400,15 +406,25 @@ function create() {
     patternSelect.on('click', (e) => {
         nextPattern = e.target.value;
     });
-	
-	// Mode
-    this.add.text(20, 800, 'Mode:');
-    modes = this.add.dom(20, 820).createFromCache('modes');
-    modes.setOrigin(0, 0);
-    modes.addListener('click');
+    
+    // Animation
+    this.add.text(20, 800, 'Animations:');
+    aniOption = this.add.dom(20, 820).createFromCache('aniOption');
+    aniOption.setOrigin(0, 0);
+    aniOption.addListener('click');
 
-    modes.on('click', (e) => {
-        currentMode = e.target.value;
+    aniOption.on('click', (e) => {
+        aniMode = e.target.value;
+    });
+    
+    // Retry
+    this.add.text(20, 860, 'Retrying:');
+    retryOption = this.add.dom(20, 880).createFromCache('retryOption');
+    retryOption.setOrigin(0, 0);
+    retryOption.addListener('click');
+
+    retryOption.on('click', (e) => {
+        retryMode = e.target.value;
     });
 
     newPattern(scene);

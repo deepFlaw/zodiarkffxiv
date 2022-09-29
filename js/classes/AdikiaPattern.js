@@ -34,9 +34,9 @@ class AdikiaPattern extends Pattern
         const white = Phaser.Display.Color.ValueToColor(0xFFFFFF);
         const coolRed = Phaser.Display.Color.ValueToColor(0xDE151F);
 
-		let adikiaDuration = hasDuration ? constants.ANIMATION_DURATIONS.adikia : 0;
-		let delay = hasDuration ? this.animationDelay : 0;
-		
+        let adikiaDuration = hasDuration ? constants.ANIMATION_DURATIONS.adikia : 0;
+        let delay = hasDuration ? this.animationDelay : 0;
+        
         this.scene.tweens.add({
             targets: this.images.getChildren(),
             duration: adikiaDuration / 2,
@@ -76,11 +76,11 @@ class AdikiaPattern extends Pattern
         this.dangerSpots.clear(true, true);
         this.images.clear(true, true);
     }
-	
-	retry() {
-		this.reset();
-		this.preDraw();
-	}
+    
+    retry() {
+        this.reset();
+        this.preDraw();
+    }
 }
 
 export default AdikiaPattern;
