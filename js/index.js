@@ -57,12 +57,7 @@ let retryMode = 0;
 function createPatternsFromConfig(scene, config) {
     let parsedPatterns = [];
     if (Array.isArray(config)) {
-        for (const pattern of config) {
-            // Flashcard modes do all animations at once
-            if (aniMode == 1) {
-                animationDelay = 0;
-            }
-            
+        for (const pattern of config) {            
             switch(pattern.type) {
                 case 'rotation':
                     rotation = Math.random() > 0.5 ? 'clockwise' : 'counterclockwise';
@@ -148,12 +143,7 @@ function createPatternsFromConfig(scene, config) {
             }
         }
     }
-
-    // Set a small delay even in flashcard mode to avoid issues with continuing too soon
-    if (aniMode == 1) {
-        animationDelay = 1500;
-    }       
-
+    
     return parsedPatterns;
 }
 
@@ -178,6 +168,9 @@ function checkResult(scene) {
     gameOver = true;
     confirmButton.setEnabled(false);
     postDraw(scene);
+    
+    // For flashcard mode, have a small delay to avoid issues with continuing too soon
+    let usedDelay = aniMode == 0 ? animationDelay : 1500;
 
     setTimeout(() => {
         let safe = verifyTargetPosition(scene);
@@ -190,18 +183,22 @@ function checkResult(scene) {
         } else {
             resultIcon = scene.add.image(700, 700, 'redx');
         }
-		
-		// Show next unless in Required mode
-		if (retryMode < 2 || safe) {
-            nextButton.setVisible(true);
+        
+        nextButton.setVisible(true);
+        // Disable next if failed in Required mode
+        if (retryMode < 2 || safe) {
+            nextButton.setEnabled(true);
+        } else {
+            nextButton.setEnabled(false);
         }
+        
         // Only show retry when in those modes
-        if (retryMode > 0 && !safe) {
+        if (retryMode > 0) {
             retryButton.setVisible(true);
         }
 
         confirmButton.setVisible(false);
-    }, animationDelay);
+    }, usedDelay);
 }
 
 function postDraw(scene) {
@@ -310,7 +307,6 @@ function retryScene() {
     retryButton.setVisible(false);
 
     arena.angle = 0;
-    animationDelay = 0;
     rotation = false;
     gameOver = false;
 }
